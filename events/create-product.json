@@ -1,0 +1,12 @@
+{
+  "httpMethod": "POST",
+  "path": "/products",
+  "pathParameters": null,
+  "queryStringParameters": null,
+  "headers": {
+    "Content-Type": "application/json",
+    "Accept": "application/json"
+  },
+  "body": "{\"name\": \"Notebook Dell\", \"description\": \"Notebook i7 16GB RAM 512GB SSD\", \"price\": 4500.00, \"stock\": 10}",
+  "isBase64Encoded": false
+}

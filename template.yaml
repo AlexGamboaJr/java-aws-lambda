@@ -1,0 +1,131 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Java AWS Lambda - API de Produtos com DynamoDB e S3
+
+Globals:
+  Function:
+    Runtime: java21
+    MemorySize: 512
+    Timeout: 30
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref ProductsTable
+
+Resources:
+
+  # ── Lambda: CRUD de Produtos via API Gateway ──────────────────────────────
+  ProductsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: java-lambda-products
+      Handler: com.alexgamboa.lambda.handler.ProductHandler::handleRequest
+      CodeUri: target/lambda-1.0.0-aws.jar
+      Description: Gerencia operações CRUD de produtos via API Gateway REST
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ProductsTable
+      Events:
+        ListProducts:
+          Type: Api
+          Properties:
+            Path: /products
+            Method: get
+        CreateProduct:
+          Type: Api
+          Properties:
+            Path: /products
+            Method: post
+        GetProduct:
+          Type: Api
+          Properties:
+            Path: /products/{id}
+            Method: get
+        DeleteProduct:
+          Type: Api
+          Properties:
+            Path: /products/{id}
+            Method: delete
+
+  # ── Lambda: Processamento de Eventos S3 ──────────────────────────────────
+  S3EventFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: java-lambda-s3-event
+      Handler: com.alexgamboa.lambda.handler.S3EventHandler::handleRequest
+      CodeUri: target/lambda-1.0.0-aws.jar
+      Description: Processa eventos de upload/remoção de objetos no bucket S3
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref ProductsBucket
+      Events:
+        S3ObjectCreated:
+          Type: S3
+          Properties:
+            Bucket: !Ref ProductsBucket
+            Events: s3:ObjectCreated:*
+        S3ObjectRemoved:
+          Type: S3
+          Properties:
+            Bucket: !Ref ProductsBucket
+            Events: s3:ObjectRemoved:*
+
+  # ── DynamoDB: Tabela de Produtos ──────────────────────────────────────────
+  ProductsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Products
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      Tags:
+        - Key: Project
+          Value: java-aws-lambda
+        - Key: Environment
+          Value: prod
+
+  # ── S3: Bucket de Produtos ────────────────────────────────────────────────
+  ProductsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "java-lambda-products-${AWS::AccountId}-${AWS::Region}"
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Project
+          Value: java-aws-lambda
+
+Outputs:
+  ApiUrl:
+    Description: URL base da API de Produtos
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+    Export:
+      Name: !Sub "${AWS::StackName}-ApiUrl"
+
+  ProductsFunctionArn:
+    Description: ARN da Lambda de Produtos
+    Value: !GetAtt ProductsFunction.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-ProductsFunctionArn"
+
+  ProductsTableName:
+    Description: Nome da tabela DynamoDB
+    Value: !Ref ProductsTable
+    Export:
+      Name: !Sub "${AWS::StackName}-ProductsTableName"
+
+  ProductsBucketName:
+    Description: Nome do bucket S3
+    Value: !Ref ProductsBucket
+    Export:
+      Name: !Sub "${AWS::StackName}-ProductsBucketName"

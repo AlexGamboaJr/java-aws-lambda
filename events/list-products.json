@@ -1,0 +1,11 @@
+{
+  "httpMethod": "GET",
+  "path": "/products",
+  "pathParameters": null,
+  "queryStringParameters": null,
+  "headers": {
+    "Accept": "application/json"
+  },
+  "body": null,
+  "isBase64Encoded": false
+}

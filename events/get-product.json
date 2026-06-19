@@ -1,0 +1,13 @@
+{
+  "httpMethod": "GET",
+  "path": "/products/550e8400-e29b-41d4-a716-446655440000",
+  "pathParameters": {
+    "id": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "queryStringParameters": null,
+  "headers": {
+    "Accept": "application/json"
+  },
+  "body": null,
+  "isBase64Encoded": false
+}
