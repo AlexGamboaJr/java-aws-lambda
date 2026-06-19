@@ -26,6 +26,8 @@ import java.util.Optional;
  */
 public class ProductHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProductHandler.class);
+
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final ProductService productService;
@@ -49,6 +51,8 @@ public class ProductHandler implements RequestHandler<APIGatewayProxyRequestEven
         String httpMethod = event.getHttpMethod();
         String path = event.getPath();
         Map<String, String> pathParameters = event.getPathParameters();
+
+        log.info("Recebendo {} {}", event.getHttpMethod(), event.getPath());
 
         if (context != null) {
             context.getLogger().log(String.format("[ProductHandler] %s %s", httpMethod, path));

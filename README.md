@@ -40,6 +40,30 @@ API REST serverless para gerenciamento de produtos, construída com **Java 21**,
 
 ---
 
+## Arquitetura & SOLID
+
+| Princípio | Onde foi aplicado |
+|---|---|
+| **S** — Single Responsibility | `ProductHandler` faz só roteamento HTTP, `ProductService` só regras de negócio, `DynamoDbService` só acesso ao banco |
+| **O** — Open/Closed | Novos handlers podem ser adicionados sem modificar os existentes |
+| **L** — Liskov Substitution | `DynamoDbService` usa construtor package-private para facilitar substituição por mock nos testes |
+| **I** — Interface Segregation | Cada handler implementa apenas `RequestHandler` com os tipos que precisa |
+| **D** — Dependency Inversion | `ProductService` recebe `DynamoDbService` via construtor — fácil de testar e substituir |
+
+### Arquitetura Serverless
+```
+Internet → API Gateway → AWS Lambda (Java 21)
+                              ├── ProductHandler → DynamoDB (CRUD)
+                              └── S3EventHandler → processa uploads S3
+```
+
+### Design Patterns utilizados
+- **Singleton Pattern** — `DynamoDbService.getInstance()` garante uma única conexão por container Lambda
+- **Builder Pattern** — `DynamoDbClient.builder()` e `APIGatewayProxyResponseEvent` usam builders
+- **Factory Method** — `ResponseBuilder` centraliza criação de respostas HTTP padronizadas
+
+---
+
 ## Pré-requisitos
 
 | Ferramenta   | Versão mínima | Link                                                              |

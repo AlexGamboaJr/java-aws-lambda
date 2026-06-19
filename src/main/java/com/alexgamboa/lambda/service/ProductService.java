@@ -13,6 +13,8 @@ import java.util.UUID;
  */
 public class ProductService {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProductService.class);
+
     private final DynamoDbService dynamoDbService;
 
     /**
@@ -48,6 +50,8 @@ public class ProductService {
         if (product.getPrice() == null || product.getPrice() < 0) {
             throw new IllegalArgumentException("O campo 'price' deve ser um número positivo.");
         }
+
+        log.info("Criando produto: {}", product.getName());
 
         // Atribui id único e timestamp de criação
         product.setId(UUID.randomUUID().toString());

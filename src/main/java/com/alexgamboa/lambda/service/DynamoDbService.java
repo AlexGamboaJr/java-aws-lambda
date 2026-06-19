@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
  */
 public class DynamoDbService {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DynamoDbService.class);
+
     private static DynamoDbService instance;
 
     private final DynamoDbClient dynamoDbClient;
@@ -77,6 +79,8 @@ public class DynamoDbService {
      * @return Optional com o produto, ou Optional.empty() se não encontrado.
      */
     public Optional<Product> getItem(String id) {
+        log.info("Buscando item id={} na tabela {}", id, tableName);
+
         Map<String, AttributeValue> key = new HashMap<>();
         key.put("id", AttributeValue.builder().s(id).build());
 
@@ -118,6 +122,8 @@ public class DynamoDbService {
      * @return true se o item existia e foi removido, false caso contrário.
      */
     public boolean deleteItem(String id) {
+        log.info("Deletando item id={}", id);
+
         // Verifica se o item existe antes de deletar
         Optional<Product> existing = getItem(id);
         if (existing.isEmpty()) {
